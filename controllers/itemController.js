@@ -1,8 +1,30 @@
 const Item = require("../models/item");
+const Category = require("../models/category");
+const ItemInstance = require("../models/iteminstance");
 const asyncHandler = require("express-async-handler");
 
+
 exports.index = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Site Home Page");
+  // Get details of items, item instances, and category counts (in parallel)
+  const [
+    numItems,
+    numItemInstances,
+    numAvailableItemInstances,
+    numCategories,
+  ] = await Promise.all([
+    Item.countDocuments({}).exec(),
+    ItemInstance.countDocuments({}).exec(),
+    ItemInstance.countDocuments({ status: "Available" }).exec(),
+    Category.countDocuments({}).exec(),
+  ]);
+
+  res.render("index", {
+    title: "Inventory Application Home",
+    item_count: numItems,
+    item_instance_count: numItemInstances,
+    item_instance_available_count: numAvailableItemInstances,
+    category_count: numCategories,
+  });
 });
 
 // Display list of all items.
