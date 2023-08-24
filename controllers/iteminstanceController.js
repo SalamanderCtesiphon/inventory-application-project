@@ -1,10 +1,16 @@
 const ItemInstance = require("../models/iteminstance");
 const asyncHandler = require("express-async-handler");
 
-// Display a list of all item instances
+// Display list of all BookInstances.
 exports.iteminstance_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: ItemInstance list");
+  const allItemInstances = await ItemInstance.find().populate("item").exec();
+
+  res.render("iteminstance_list", {
+    title: "Item Instance List",
+    iteminstance_list: allItemInstances,
+  });
 });
+
 
 // Display detail page for a specific ItemInstance
 exports.iteminstance_detail = asyncHandler(async (req, res, next) => {
