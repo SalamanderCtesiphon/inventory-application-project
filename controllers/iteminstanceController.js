@@ -1,7 +1,10 @@
 const ItemInstance = require("../models/iteminstance");
+const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-// Display list of all BookInstances.
+const Item = require("../models/item");
+
+// Display list of all ItemInstances.
 exports.iteminstance_list = asyncHandler(async (req, res, next) => {
   const allItemInstances = await ItemInstance.find().populate("item").exec();
 
@@ -34,14 +37,56 @@ exports.iteminstance_detail = asyncHandler(async (req, res, next) => {
 
 
 // Display ItemInstance create form on GET
+// Display ItemInstance create form on GET.
 exports.iteminstance_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: ItemInstace create GET");
+  const allItems = await Item.find({}, "name").exec();
+
+  res.render("iteminstance_form", {
+    title: "Create ItemInstance",
+    item_list: allItems,
+  });
 });
 
+
 // Handle ItemInstance create on POST
-exports.iteminstance_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMNETED: ItemInstance create POST");
-});
+// Handle itemInstance create on POST.
+exports.iteminstance_create_post = [
+  // Validate and sanitize fields.
+  body("item", "item must be specified").trim().isLength({ min: 1 }).escape(),
+  
+
+  // Process request after validation and sanitization.
+  asyncHandler(async (req, res, next) => {
+    // Extract the validation errors from a request.
+    const errors = validationResult(req);
+
+    // Create a itemInstance object with escaped and trimmed data.
+    const itemInstance = new ItemInstance({
+      item: req.body.item,
+    
+    });
+
+    if (!errors.isEmpty()) {
+      // There are errors.
+      // Render form again with sanitized values and error messages.
+      const allitems = await Item.find({}, "name").exec();
+
+      res.render("iteminstance_form", {
+        title: "Create itemInstance",
+        item_list: allitems,
+        selected_item: itemInstance.item._id,
+        errors: errors.array(),
+        iteminstance: itemInstance,
+      });
+      return;
+    } else {
+      // Data from form is valid
+      await itemInstance.save();
+      res.redirect(itemInstance.url);
+    }
+  }),
+];
+
 
 
 
