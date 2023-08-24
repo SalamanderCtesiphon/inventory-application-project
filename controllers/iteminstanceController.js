@@ -13,9 +13,25 @@ exports.iteminstance_list = asyncHandler(async (req, res, next) => {
 
 
 // Display detail page for a specific ItemInstance
+// Display detail page for a specific itemInstance.
 exports.iteminstance_detail = asyncHandler(async (req, res, next) => {
-  res.send(`NOT IMPLEMENTED: ItemInstance detail: ${req.params.id}`);
+  const itemInstance = await ItemInstance.findById(req.params.id)
+    .populate("item")
+    .exec();
+
+  if (itemInstance === null) {
+    // No results.
+    const err = new Error("Item copy not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("iteminstance_detail", {
+    title: "Item:",
+    iteminstance: itemInstance,
+  });
 });
+
 
 // Display ItemInstance create form on GET
 exports.iteminstance_create_get = asyncHandler(async (req, res, next) => {

@@ -1,0 +1,10 @@
+extends layout
+
+block content
+
+  h1 ID: #{iteminstance._id}
+
+  p #[strong Title:]
+    a(href=iteminstance.item.url) #{iteminstance.item.name}
+
+
